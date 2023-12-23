@@ -1,0 +1,68 @@
+USE [dbaugust]
+GO
+/****** Object:  StoredProcedure [dbo].[pr_employeemaster]    Script Date: 22-12-2023 13:42:18 ******/
+SET ANSI_NULLS ON
+GO
+SET QUOTED_IDENTIFIER ON
+GO
+-- =============================================
+-- Author:		<Author,,Name>
+-- Create date: <Create Date,,>
+-- Description:	<Description,,>
+-- =============================================
+ALTER PROCEDURE [dbo].[pr_employeemaster]
+(
+    @empid int,
+	@empname varchar(50)='',
+	@designation varchar(50)='',
+	@groasal varchar(30)='0.0',
+	@deducts varchar(30)='0.0',
+	@netsal varchar(30)='0.0',
+	@isactive varchar(1)='Y',
+	@action varchar(30)
+
+
+)
+
+AS
+BEGIN
+
+    if @action='select'
+    begin
+	if @empid=0
+	select * from employee;
+	else
+	select * from employee where empid=@empid;
+	end
+
+	if @action = 'insert'
+	begin
+	insert into employee
+	select @empid,@empname,@designation,@groasal,@deducts,@netsal,@isactive;
+	end
+
+	if @action = 'update'
+	begin
+	update employee set
+	empid = @empid,
+	empname = @empname,
+	designation = @designation,
+	groasal = @groasal,
+	deducts = @deducts,
+	netsal = @netsal,
+	isactive = @isactive where empid = @empid;
+	end
+
+	if @action = 'delete'
+	begin
+	delete from employee where empid=@empid;
+	end
+
+	if @action = 'getmax'
+	begin
+	select max(empid)+1 from employee;
+	end
+END
+
+	
+

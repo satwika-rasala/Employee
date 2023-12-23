@@ -1,0 +1,245 @@
+using System;
+using System.Collections;
+using System.Collections.Generic;
+using System.ComponentModel;
+using System.Data;
+using System.Data.SqlClient;
+using System.Drawing;
+using System.Linq;
+using System.Linq.Expressions;
+using System.Text;
+using System.Threading.Tasks;
+using System.Windows.Forms;
+
+namespace WinFormsApp2
+{
+    public partial class frmEmployeemaster : BaseForm
+    {
+        DAL d = new DAL();
+        bool recfnd = false;
+        public frmEmployeemaster()
+        {
+            InitializeComponent();
+            GetMaxID();
+        }
+
+        public void GetMaxID()
+        {
+            /*SqlConnection con = new SqlConnection();
+            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";
+            */
+
+            try
+            {
+                //con.Open();
+                //SqlCommand cmd = new SqlCommand();
+                //cmd.CommandText = "select max(empid)+1 from employee";
+                //cmd.Connection = con;
+                //object obj = cmd.ExecuteScalar();
+                //txtempid.Text = obj.ToString();
+                //con.Close();
+
+                //  object MaxID = d.GetID("select max(empid)+1 from employee");
+                //  txtempid.Text = MaxID.ToString();
+                d.isProcCall = true;
+                d.ClearParameters();
+                d.AddParameters("action", "getmax");
+                d.AddParameters("empid", "0");
+                object MaxID = d.GetID("pr_employeemaster");
+                d.isProcCall = false;
+                txtempid.Text = MaxID + "";
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+
+
+        private void txtdeduct_Validating(object sender, CancelEventArgs e)
+        {
+            txtnetsal.Text = (Common.cdouble(txtgrossal.Text) - Common.cdouble(txtdeduct
+                .Text)).ToString();
+
+        }
+
+        private void btnsave_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Do You Want To save?", "SaveRecords", MessageBoxButtons.YesNo) == DialogResult.No)
+                return;
+
+            string isactive = chkactive.Checked ? "Y" : "N";
+            //string Query = "";
+            d.isProcCall = true;
+            d.ClearParameters();
+            d.AddParameters("empid", txtempid.Text);
+            d.AddParameters("empname", txtempname.Text);
+            d.AddParameters("designation", cmbdesignation.Text);
+            d.AddParameters("groasal", txtgrossal.Text);
+            d.AddParameters("deducts", txtdeduct.Text);
+            d.AddParameters("netsal", txtnetsal.Text);
+            d.AddParameters("isactive", isactive);
+
+
+
+
+            /* string Query = $"insert into employee values('{txtempid.Text}','{txtempname.Text}','{cmbdesignation.Text}','{txtgrossal.Text}','{txtdeduct.Text}','{txtnetsal.Text}','{isactive}')";*/
+            /*StringBuilder sb = new StringBuilder();
+            sb.AppendLine("insert into employee");
+            sb.AppendFormat("values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", txtempid.Text, txtempname.Text, cmbdesignation.Text, txtgrossal.Text, txtdeduct.Text, txtnetsal.Text, isactive);*/
+
+            /*SqlConnection con = new SqlConnection();
+            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";*/
+
+            if (!recfnd)  //insert the record
+            {
+                //Query = $"insert into employee values('{txtempid.Text}','{txtempname.Text}','{cmbdesignation.Text}','{txtgrossal.Text}','{txtdeduct.Text}','{txtnetsal.Text}','{isactive}')";
+
+                d.AddParameters("action", "insert");
+
+            }
+            else //update if record found
+                //Query = $"update employee set empid='{txtempid.Text}',empname='{txtempname.Text}',designation='{cmbdesignation.Text}',groasal='{txtgrossal.Text}',deducts='{txtdeduct.Text}',netsal='{txtnetsal.Text}',isactive='{isactive}' where empid='{txtempid.Text}'";
+
+                d.AddParameters("action", "update");
+
+            try
+            {
+                /* SqlCommand cmd = new SqlCommand();
+                 cmd.Connection = con;
+                 cmd.CommandText = sb.ToString();
+                 cmd.Connection.Open();
+                 int res = cmd.ExecuteNonQuery();
+                 cmd.Connection.Close();*/
+
+                //int res = d.ExecuteQuery(Query);
+                int res = d.ExecuteQuery("pr_employeemaster");
+                if (res > 0)
+                {
+                    recfnd = false;
+                    MessageBox.Show("Record Saved Successfully  !!");
+                }
+                else
+                {
+                    MessageBox.Show("Record Not Saved  !!");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+
+
+
+        }
+
+        private void txtempid_Validating(object sender, CancelEventArgs e)
+        {
+            /*SqlConnection con = new SqlConnection();
+            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";*/
+            try
+            {
+                /* con.Open();
+                 SqlCommand cmd = new SqlCommand();
+                 cmd.CommandText = "select * from employee where empid= " + txtempid.Text;
+                 cmd.Connection = con;
+
+                 SqlDataReader rdr = cmd.ExecuteReader();*/
+                //SqlDataReader rdr = d.GetDataReader("Select * from employee where empid=" + txtempid.Text);
+                d.isProcCall = true;
+                d.ClearParameters();
+                d.AddParameters("action", "select");
+                d.AddParameters("empid", txtempid.Text);
+                SqlDataReader rdr = d.GetDataReader("pr_employeemaster");
+                if (rdr != null && rdr.HasRows)
+                {
+                    recfnd = true;
+                    rdr.Read();
+                    txtempname.Text = rdr["empname"].ToString();
+                    cmbdesignation.Text = rdr["designation"].ToString();
+                    txtgrossal.Text = rdr["groasal"].ToString();
+                    txtdeduct.Text = rdr["deducts"].ToString();
+                    txtnetsal.Text = rdr["netsal"].ToString();
+                    if (rdr["isActive"].ToString() == "Y")
+                    {
+                        chkactive.Checked = true;
+                    }
+                    else
+                        chkactive.Checked = false;
+                }
+                else
+                {
+                    recfnd = false;
+                    txtempname.Text = "";
+                    cmbdesignation.Text = "";
+                    txtgrossal.Text = "";
+                    txtdeduct.Text = "";
+                    txtnetsal.Text = "";
+                }
+                rdr.Close();
+                //con.Close();
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+
+        }
+
+        private void btncancel_Click(object sender, EventArgs e)
+        {
+            ClearControl(txtempid, Controls);
+            txtempid.Focus();
+            GetMaxID();
+        }
+
+        private void btndelete_Click(object sender, EventArgs e)
+        {
+            if (MessageBox.Show("Do You want to Delete", "DeleteEmp", MessageBoxButtons.YesNo) == DialogResult.No)
+                return;
+
+            //string query = "";
+            //if (recfnd)
+            //{
+            // query=$"delete from employee where empid='{txtempid.Text}'";
+
+            //}
+            try
+            {
+                //int res = d.ExecuteQuery(query);
+                d.isProcCall = true;
+                d.ClearParameters();
+                d.AddParameters("action", "delete");
+                d.AddParameters("empid", txtempid.Text);
+                int res = d.ExecuteQuery("pr_employeemaster");
+                if (res > 0)
+                {
+                    MessageBox.Show("Record Deleted Successfuly !! ");
+                    ClearControl(txtempid, Controls);
+                    txtempid.Focus();
+                    GetMaxID();
+                    recfnd = false;
+
+                }
+
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show(ex.Message);
+            }
+        }
+
+        private void txtempid_TextChanged(object sender, EventArgs e)
+        {
+
+
+        }
+
+        private void chkactive_CheckedChanged(object sender, EventArgs e)
+        {
+
+        }
+    }
+}
