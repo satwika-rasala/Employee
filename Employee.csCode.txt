@@ -25,22 +25,9 @@ namespace WinFormsApp2
 
         public void GetMaxID()
         {
-            /*SqlConnection con = new SqlConnection();
-            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";
-            */
 
             try
             {
-                //con.Open();
-                //SqlCommand cmd = new SqlCommand();
-                //cmd.CommandText = "select max(empid)+1 from employee";
-                //cmd.Connection = con;
-                //object obj = cmd.ExecuteScalar();
-                //txtempid.Text = obj.ToString();
-                //con.Close();
-
-                //  object MaxID = d.GetID("select max(empid)+1 from employee");
-                //  txtempid.Text = MaxID.ToString();
                 d.isProcCall = true;
                 d.ClearParameters();
                 d.AddParameters("action", "getmax");
@@ -70,7 +57,6 @@ namespace WinFormsApp2
                 return;
 
             string isactive = chkactive.Checked ? "Y" : "N";
-            //string Query = "";
             d.isProcCall = true;
             d.ClearParameters();
             d.AddParameters("empid", txtempid.Text);
@@ -80,40 +66,16 @@ namespace WinFormsApp2
             d.AddParameters("deducts", txtdeduct.Text);
             d.AddParameters("netsal", txtnetsal.Text);
             d.AddParameters("isactive", isactive);
-
-
-
-
-            /* string Query = $"insert into employee values('{txtempid.Text}','{txtempname.Text}','{cmbdesignation.Text}','{txtgrossal.Text}','{txtdeduct.Text}','{txtnetsal.Text}','{isactive}')";*/
-            /*StringBuilder sb = new StringBuilder();
-            sb.AppendLine("insert into employee");
-            sb.AppendFormat("values ('{0}','{1}','{2}','{3}','{4}','{5}','{6}')", txtempid.Text, txtempname.Text, cmbdesignation.Text, txtgrossal.Text, txtdeduct.Text, txtnetsal.Text, isactive);*/
-
-            /*SqlConnection con = new SqlConnection();
-            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";*/
-
-            if (!recfnd)  //insert the record
+            if (!recfnd)
             {
-                //Query = $"insert into employee values('{txtempid.Text}','{txtempname.Text}','{cmbdesignation.Text}','{txtgrossal.Text}','{txtdeduct.Text}','{txtnetsal.Text}','{isactive}')";
-
-                d.AddParameters("action", "insert");
+                   d.AddParameters("action", "insert");
 
             }
-            else //update if record found
-                //Query = $"update employee set empid='{txtempid.Text}',empname='{txtempname.Text}',designation='{cmbdesignation.Text}',groasal='{txtgrossal.Text}',deducts='{txtdeduct.Text}',netsal='{txtnetsal.Text}',isactive='{isactive}' where empid='{txtempid.Text}'";
-
-                d.AddParameters("action", "update");
+            else 
+                    d.AddParameters("action", "update");
 
             try
             {
-                /* SqlCommand cmd = new SqlCommand();
-                 cmd.Connection = con;
-                 cmd.CommandText = sb.ToString();
-                 cmd.Connection.Open();
-                 int res = cmd.ExecuteNonQuery();
-                 cmd.Connection.Close();*/
-
-                //int res = d.ExecuteQuery(Query);
                 int res = d.ExecuteQuery("pr_employeemaster");
                 if (res > 0)
                 {
@@ -129,25 +91,12 @@ namespace WinFormsApp2
             {
                 MessageBox.Show(ex.Message);
             }
-
-
-
-
         }
 
         private void txtempid_Validating(object sender, CancelEventArgs e)
         {
-            /*SqlConnection con = new SqlConnection();
-            con.ConnectionString = @"Data Source=SHRADDHA\SQLEXPRESS;Initial Catalog=dbaugust;Integrated Security=True";*/
             try
             {
-                /* con.Open();
-                 SqlCommand cmd = new SqlCommand();
-                 cmd.CommandText = "select * from employee where empid= " + txtempid.Text;
-                 cmd.Connection = con;
-
-                 SqlDataReader rdr = cmd.ExecuteReader();*/
-                //SqlDataReader rdr = d.GetDataReader("Select * from employee where empid=" + txtempid.Text);
                 d.isProcCall = true;
                 d.ClearParameters();
                 d.AddParameters("action", "select");
@@ -179,7 +128,6 @@ namespace WinFormsApp2
                     txtnetsal.Text = "";
                 }
                 rdr.Close();
-                //con.Close();
             }
             catch (Exception ex)
             {
@@ -187,28 +135,18 @@ namespace WinFormsApp2
             }
 
         }
-
         private void btncancel_Click(object sender, EventArgs e)
         {
             ClearControl(txtempid, Controls);
             txtempid.Focus();
             GetMaxID();
         }
-
         private void btndelete_Click(object sender, EventArgs e)
         {
             if (MessageBox.Show("Do You want to Delete", "DeleteEmp", MessageBoxButtons.YesNo) == DialogResult.No)
                 return;
-
-            //string query = "";
-            //if (recfnd)
-            //{
-            // query=$"delete from employee where empid='{txtempid.Text}'";
-
-            //}
             try
             {
-                //int res = d.ExecuteQuery(query);
                 d.isProcCall = true;
                 d.ClearParameters();
                 d.AddParameters("action", "delete");
